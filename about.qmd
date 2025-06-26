@@ -2,4 +2,8 @@
 title: "About"
 ---
 
-About this site
+## About Me
+
+My name is **Faisal Jan**, and I graduated from *University of Turbat*.
+
+[Kane's Free Data Science Bootcamp](https://bootcamp.davidkane.info)

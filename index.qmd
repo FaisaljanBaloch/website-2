@@ -1,0 +1,57 @@
+---
+title: "Billboard Graphic"
+execute:
+  echo: false
+---
+
+```{r}
+suppressPackageStartupMessages(library(tidyverse))
+```
+
+```{r}
+# Reshape the data to long format
+billboard_long <- billboard |>
+  pivot_longer(
+    cols = starts_with("wk"),
+    names_to = "week",
+    names_prefix = "wk",
+    values_to = "rank",
+    values_drop_na = TRUE
+  ) |>
+  mutate(week = as.integer(week))
+
+# Get top 5 songs based on the best (minimum) rank
+top5_songs <- billboard_long |>
+  group_by(artist, track) |>
+  summarize(first_rank = min(rank), .groups = "drop") |>
+  arrange(first_rank) |>
+  slice(1:5)
+
+# Filter to include only the top 5 songs
+top5_long <- billboard_long |>
+  semi_join(top5_songs, by = c("artist", "track"))
+
+# Remove songs with fewer than 2 data points
+top5_long <- top5_long |>
+  group_by(track) |>
+  filter(n() >= 2) |>
+  ungroup()
+
+
+# Plot
+ggplot(top5_long, aes(x = week, y = rank, group = track, color = track)) +
+  geom_line(linewidth = 1.5) +
+  scale_y_reverse(breaks = seq(1, 100, by = 10)) +
+  labs(
+    title = "Top 5 Billboard Songs of 2000: Weekly Chart Positions",
+    subtitle = "Chart movement over weeks (Rank 1 is top)",
+    x = "Week on Chart",
+    y = "Chart Rank",
+    color = "Song Title"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 18),
+    legend.position = "bottom"
+  )
+```
